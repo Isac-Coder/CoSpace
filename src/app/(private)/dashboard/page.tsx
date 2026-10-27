@@ -1,76 +1,17 @@
 "use client";
-
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-
-interface Reservation {
-  id: string;
-  space: { name: string };
-  startTime: string;
-  endTime: string;
-  totalPrice: number;
-  status: string;
+interface Reservation { id:string; space:{name:string}; startTime:string; endTime:string; totalPrice:number|string; status:"CONFIRMED"|"CANCELLED"|string; }
+const money=(v:number|string)=>new Intl.NumberFormat("es-CO",{style:"currency",currency:"COP",maximumFractionDigits:0}).format(Number(v));
+const date=(v:string)=>new Intl.DateTimeFormat("es-CO",{weekday:"short",day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}).format(new Date(v));
+export default function DashboardPage(){const [reservations,setReservations]=useState<Reservation[]>([]);const [loading,setLoading]=useState(true);const [error,setError]=useState("");const [cancelling,setCancelling]=useState("");
+ async function load(){try{const res=await fetch("/api/reservations",{cache:"no-store"});const data=await res.json();if(!res.ok)throw new Error(data.error||"No fue posible cargar las reservas.");setReservations(Array.isArray(data)?data:[]);}catch(e){setError(e instanceof Error?e.message:"Error inesperado.");}finally{setLoading(false);}}
+ useEffect(()=>{void load();},[]);const now=new Date();const upcoming=useMemo(()=>reservations.filter(r=>r.status==="CONFIRMED"&&new Date(r.startTime)>now).sort((a,b)=>+new Date(a.startTime)-+new Date(b.startTime)),[reservations]);const confirmed=reservations.filter(r=>r.status==="CONFIRMED");const totalSpent=confirmed.reduce((sum,r)=>sum+Number(r.totalPrice),0);
+ async function cancel(id:string){if(!confirm("¿Quieres cancelar esta reserva?"))return;setCancelling(id);setError("");try{const res=await fetch(`/api/reservations/${id}`,{method:"PATCH"});const data=await res.json();if(!res.ok)throw new Error(data.error||"No fue posible cancelar la reserva.");await load();}catch(e){setError(e instanceof Error?e.message:"Error inesperado.");}finally{setCancelling("");}}
+ return <main className="min-h-screen bg-[#080d18] px-4 py-8 text-white sm:px-7 lg:px-10 lg:py-10"><div className="mx-auto max-w-7xl"><header className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-xs font-semibold uppercase tracking-[.22em] text-blue-400">Tu espacio personal</p><h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">Mi dashboard</h1><p className="mt-2 text-sm text-slate-400">Consulta tus reservas y organiza tu próxima jornada.</p></div><Link href="/spaces" className="w-fit rounded-xl bg-blue-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-400">＋ Reservar un espacio</Link></header>
+ {error&&<div role="alert" className="mb-5 rounded-xl border border-rose-400/20 bg-rose-400/10 px-4 py-3 text-sm text-rose-200">{error}</div>}
+ <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"><Stat label="Todas las reservas" value={loading?"—":String(reservations.length)} icon="▦" hint="Historial completo"/><Stat label="Confirmadas" value={loading?"—":String(confirmed.length)} icon="✓" hint="Reservas vigentes"/><Stat label="Próximas" value={loading?"—":String(upcoming.length)} icon="◷" hint="Sesiones por venir"/><Stat label="Total reservado" value={loading?"—":money(totalSpent)} icon="$" hint="Suma de reservas confirmadas"/></section>
+ <div className="mt-7 grid gap-6 xl:grid-cols-[.8fr_1.2fr]"><section className="rounded-2xl border border-white/[.08] bg-[#111827] p-5 sm:p-6"><div className="flex items-center justify-between"><div><h2 className="text-lg font-semibold">Tu próxima reserva</h2><p className="mt-1 text-sm text-slate-500">Lo que viene en tu agenda</p></div><span className="grid h-10 w-10 place-items-center rounded-xl bg-blue-400/10 text-xl text-blue-300">◷</span></div>{loading?<p className="mt-8 text-sm text-slate-500">Cargando agenda...</p>:upcoming[0]?<div className="mt-6 rounded-2xl border border-blue-400/15 bg-gradient-to-br from-blue-500/10 to-transparent p-5"><span className="rounded-full bg-emerald-400/10 px-2.5 py-1 text-xs font-medium text-emerald-300">Confirmada</span><h3 className="mt-4 text-2xl font-semibold">{upcoming[0].space.name}</h3><p className="mt-2 text-sm text-slate-400">{date(upcoming[0].startTime)}</p><p className="mt-1 text-sm text-slate-500">Hasta {new Date(upcoming[0].endTime).toLocaleTimeString("es-CO",{hour:"2-digit",minute:"2-digit"})}</p><div className="mt-5 flex items-center justify-between border-t border-white/10 pt-4"><span className="text-sm text-slate-400">Total</span><span className="font-semibold">{money(upcoming[0].totalPrice)}</span></div></div>:<div className="mt-6 rounded-2xl border border-dashed border-white/10 px-5 py-10 text-center"><p className="font-medium">Tu agenda está libre</p><p className="mt-2 text-sm text-slate-500">Busca un espacio para tu próxima jornada.</p><Link href="/spaces" className="mt-4 inline-block text-sm font-semibold text-blue-300">Explorar espacios →</Link></div>}</section>
+ <section className="overflow-hidden rounded-2xl border border-white/[.08] bg-[#111827]"><div className="flex items-center justify-between border-b border-white/[.07] p-5 sm:px-6"><div><h2 className="text-lg font-semibold">Historial de reservas</h2><p className="mt-1 text-sm text-slate-500">Tus espacios reservados recientemente</p></div><span className="text-xs text-slate-500">{reservations.length} total</span></div>{loading?<div className="p-10 text-center text-sm text-slate-500">Cargando reservas...</div>:reservations.length===0?<div className="p-10 text-center"><p className="font-medium">Todavía no tienes reservas</p><p className="mt-2 text-sm text-slate-500">Cuando reserves un espacio aparecerá aquí.</p><Link href="/spaces" className="mt-4 inline-block text-sm font-semibold text-blue-300">Ver espacios disponibles →</Link></div>:<div className="divide-y divide-white/[.06]">{reservations.map(r=><article key={r.id} className="flex flex-col justify-between gap-4 p-5 sm:flex-row sm:items-center sm:px-6"><div className="flex items-start gap-3"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white/[.04] text-blue-300">◈</span><div><h3 className="font-medium">{r.space.name}</h3><p className="mt-1 text-xs text-slate-500">{date(r.startTime)} – {new Date(r.endTime).toLocaleTimeString("es-CO",{hour:"2-digit",minute:"2-digit"})}</p><p className="mt-2 text-sm font-semibold">{money(r.totalPrice)}</p></div></div><div className="flex items-center gap-3 sm:justify-end"><span className={`rounded-full px-2.5 py-1 text-xs font-medium ${r.status==="CONFIRMED"?"bg-emerald-400/10 text-emerald-300":"bg-rose-400/10 text-rose-300"}`}>{r.status==="CONFIRMED"?"Confirmada":"Cancelada"}</span>{r.status==="CONFIRMED"&&new Date(r.startTime)>new Date()&&<button disabled={cancelling===r.id} onClick={()=>void cancel(r.id)} className="rounded-lg border border-white/10 px-3 py-2 text-xs text-slate-300 hover:border-rose-400/30 hover:text-rose-300 disabled:opacity-50">{cancelling===r.id?"Cancelando...":"Cancelar"}</button>}</div></article>)}</div>}</section></div></div></main>;
 }
-
-export default function DashboardPage() {
-  const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch("/api/reservations")
-      .then((res) => res.json())
-      .then((data) => {
-        setReservations(data);
-        setLoading(false);
-      });
-  }, []);
-
-  if (loading) return <div className="p-8">Cargando reservas...</div>;
-
-  const nextReservation = reservations.filter(r => new Date(r.startTime) > new Date())[0];
-
-  return (
-    <div className="p-8 max-w-4xl mx-auto">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Mi Dashboard</h1>
-        <Link href="/spaces" className="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700">
-          Reservar Nuevo Espacio
-        </Link>
-      </div>
-
-      {nextReservation && (
-        <section className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-8">
-          <h2 className="text-lg font-semibold text-blue-900 mb-4">Próxima Reserva</h2>
-          <p className="text-2xl font-bold text-blue-950">{nextReservation.space.name}</p>
-          <p className="text-blue-800">
-            {new Date(nextReservation.startTime).toLocaleString()}
-          </p>
-        </section>
-      )}
-
-      <h2 className="text-2xl font-bold mb-6">Mis Reservas</h2>
-      {reservations.length === 0 ? (
-        <p className="text-gray-500">No tienes reservas registradas.</p>
-      ) : (
-        <div className="space-y-4">
-          {reservations.map((res) => (
-            <div key={res.id} className="bg-white border p-4 rounded-xl shadow-sm flex justify-between items-center">
-              <div>
-                <p className="font-semibold">{res.space.name}</p>
-                <p className="text-sm text-gray-500">
-                  {new Date(res.startTime).toLocaleString()} - {new Date(res.endTime).toLocaleString()}
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="font-bold">${res.totalPrice}</p>
-                <span className={`px-2 py-1 rounded text-xs ${res.status === 'CONFIRMED' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                  {res.status}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
+function Stat({label,value,icon,hint}:{label:string;value:string;icon:string;hint:string}){return <article className="rounded-2xl border border-white/[.08] bg-[#111827] p-5"><div className="flex items-center justify-between"><p className="text-sm text-slate-400">{label}</p><span className="grid h-9 w-9 place-items-center rounded-xl bg-blue-400/10 text-blue-300">{icon}</span></div><p className="mt-4 text-2xl font-semibold tracking-tight">{value}</p><p className="mt-1 text-xs text-slate-500">{hint}</p></article>}

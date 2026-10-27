@@ -25,7 +25,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 
     const { id } = params;
     const body = await req.json();
-    const { name, description, pricePerHour } = body;
+    const { name, description, pricePerHour, isActive } = body;
 
     const space = await prisma.space.update({
       where: { id },
@@ -33,6 +33,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
         name: name,
         description: description,
         pricePerHour: pricePerHour,
+        ...(typeof isActive === "boolean" ? { isActive } : {}),
       },
     });
 

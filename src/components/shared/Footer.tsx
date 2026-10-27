@@ -1,7 +1,2 @@
-export default function Footer() {
-  return (
-    <footer className="bg-gray-800 text-white p-6 text-center">
-      <p>&copy; {new Date().getFullYear()} CoSpace - Plataforma de Coworking</p>
-    </footer>
-  );
-}
+import Link from "next/link";
+export default function Footer(){return <footer className="border-t border-white/[.07] bg-[#080d18] px-5 py-8 text-slate-500 sm:px-8"><div className="mx-auto flex max-w-7xl flex-col justify-between gap-4 sm:flex-row sm:items-center"><Link href="/" className="flex items-center gap-2 font-semibold text-slate-300"><span className="grid h-7 w-7 place-items-center rounded-lg bg-blue-500 text-xs text-white">C</span>CoSpace<span className="text-blue-400">.</span></Link><p className="text-xs">© {new Date().getFullYear()} CoSpace. Un mejor lugar para trabajar.</p><div className="flex gap-5 text-xs"><Link href="/spaces" className="transition hover:text-white">Espacios</Link><Link href="/login" className="transition hover:text-white">Iniciar sesión</Link></div></div></footer>}
