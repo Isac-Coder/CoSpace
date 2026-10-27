@@ -1,16 +1,9 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
-import pg from "pg";
+import { prisma } from "@/lib/prisma";
 import { verifyAccessToken } from "@/lib/auth/jwt";
 import { cookies } from "next/headers";
 
-const connectionString = process.env.DIRECT_URL || process.env.DATABASE_URL;
-const pool = new pg.Pool({ connectionString });
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
-
-async function isAdmin(request: Request) {
+async function isAdmin() {
   const cookieStore = await cookies();
   const token = cookieStore.get("access_token")?.value;
   if (!token) return false;
@@ -21,7 +14,7 @@ async function isAdmin(request: Request) {
 
 export async function GET() {
   try {
-    if (!(await isAdmin(null as any))) { // This is a placeholder, fixed below
+    if (!(await isAdmin())) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
     const spaces = await prisma.space.findMany();
@@ -33,15 +26,8 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    // Pass request to isAdmin
-    const cookieStore = await cookies();
-    const token = cookieStore.get("access_token")?.value;
-    if (!token || !verifyAccessToken(token)) {
+    if (!(await isAdmin())) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
-    }
-    const decoded = verifyAccessToken(token) as any;
-    if (decoded.role !== "ADMIN") {
-        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const body = await req.json();

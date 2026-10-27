@@ -18,12 +18,12 @@ async function checkAdmin() {
   return decoded && decoded.role === "ADMIN" ? decoded : null;
 }
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const admin = await checkAdmin();
     if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
 
-    const { id } = params;
+    const { id } = await params;
     const body = await req.json();
     const { name, description, pricePerHour, isActive } = body;
 
