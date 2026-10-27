@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # Base de Datos (PostgreSQL)
+  db:
+    image: postgres:15-alpine
+    container_name: app-db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_DB: ${DB_NAME:-app_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Backend (NestJS)
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.back
+    container_name: app-backend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-password}@db:5432/${DB_NAME:-app_db}?schema=public
+      PORT: 3000
+    depends_on:
+      - db
+
+  # Frontend (React/Next.js)
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.front
+    container_name: app-frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
