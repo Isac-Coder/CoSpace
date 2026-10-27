@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 enum Role {
@@ -13,13 +12,51 @@ enum Role {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String
-  password  String
-  role      Role     @default(USER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String        @id @default(uuid())
+  email         String        @unique
+  name          String
+  password      String
+  role          Role          @default(USER)
+  refreshToken  String?
+  reservations  Reservation[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
 
-  @@map("users")
+enum ReservationStatus {
+  CONFIRMED
+  CANCELLED
+}
+
+model Space {
+  id           String        @id @default(uuid())
+  name         String
+  description  String
+  pricePerHour Decimal       @db.Decimal(10, 2)
+  isActive     Boolean       @default(true)
+  reservations Reservation[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Reservation {
+  id          String            @id @default(uuid())
+  userId      String
+  spaceId     String
+  startTime   DateTime
+  endTime     DateTime
+  totalPrice  Decimal           @db.Decimal(10, 2)
+  status      ReservationStatus @default(CONFIRMED)
+  user        User              @relation(fields: [userId], references: [id])
+  space       Space             @relation(fields: [spaceId], references: [id])
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+
+model Reservsa {
+  id        String    @id @default(uuid())
+  name      String        
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
