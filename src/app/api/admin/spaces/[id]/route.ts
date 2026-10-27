@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@/generated";
 import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
 import { verifyAccessToken } from "@/lib/auth/jwt";

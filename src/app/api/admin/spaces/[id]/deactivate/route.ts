@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { NextRequest, NextResponse } from "next/server";
+import { PrismaClient } from "@/generated";
 import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
 import { verifyAccessToken } from "@/lib/auth/jwt";
@@ -18,11 +18,12 @@ async function checkAdmin() {
   return decoded && decoded.role === "ADMIN" ? decoded : null;
 }
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const admin = await checkAdmin();
     if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
 
+    const params = await context.params;
     const { id } = params;
 
     // Rule 13: Cannot deactivate space with future confirmed reservations

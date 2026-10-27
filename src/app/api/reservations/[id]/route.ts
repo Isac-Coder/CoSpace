@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { NextRequest, NextResponse } from "next/server";
+import { PrismaClient } from "@/generated";
 import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
 import { verifyAccessToken } from "@/lib/auth/jwt";
@@ -18,12 +18,12 @@ async function getAuthenticatedUser() {
   return decoded ? { userId: decoded.userId, role: decoded.role } : null;
 }
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getAuthenticatedUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { id } = params;
+    const { id } = await params;
     const reservation = await prisma.reservation.findUnique({
       where: { id },
     });

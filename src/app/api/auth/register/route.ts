@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@/generated";
 import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
 
