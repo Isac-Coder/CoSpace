@@ -33,7 +33,7 @@ export async function POST(req: Request) {
     }
 
     const accessToken = signAccessToken({ userId: user.id, role: user.role });
-    const refreshToken = signRefreshToken({ userId: user.id });
+    const refreshToken = signRefreshToken({ userId: user.id, role: user.role });
 
     // Update refresh token in DB (hashead)
     await prisma.user.update({
@@ -45,14 +45,14 @@ export async function POST(req: Request) {
     cookieStore.set("access_token", accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "lax", // Cambiado de strict a lax para mejor compatibilidad en desarrollo
       maxAge: 15 * 60, // 15 minutes
     });
 
     cookieStore.set("refresh_token", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "lax", // Cambiado de strict a lax para mejor compatibilidad en desarrollo
       maxAge: 7 * 24 * 60 * 60, // 7 days
     });
 

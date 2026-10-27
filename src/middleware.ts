@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { verifyAccessToken } from "@/lib/auth/jwt";
 
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const accessToken = request.cookies.get("access_token")?.value;
 
@@ -17,8 +17,6 @@ export function proxy(request: NextRequest) {
 
   // 2. Define admin paths
   const isAdminPath = pathname.startsWith("/admin");
-  // 3. Define private paths (user dashboard, etc)
-  const isPrivatePath = pathname.startsWith("/dashboard") || pathname.startsWith("/my-reservations");
 
   // If it's a public path, let it pass
   if (isPublicPath) {
