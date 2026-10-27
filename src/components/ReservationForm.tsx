@@ -53,10 +53,11 @@ export default function ReservationForm({ spaceId, pricePerHour }: ReservationFo
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Nuevo mensaje de éxito */}
       {successMessage && (
-        <div className="bg-emerald-50 text-emerald-700 p-4 rounded-xl text-center font-medium">
-          {successMessage}
-        </div>
+        <p className="text-emerald-500 text-sm font-medium text-center p-3 bg-emerald-50 rounded-xl border border-emerald-200">
+          ¡Reserva exitosa! Redirigiendo a tu dashboard...
+        </p>
       )}
       <div className="grid grid-cols-2 gap-4">
         <div>
@@ -92,10 +93,7 @@ export default function ReservationForm({ spaceId, pricePerHour }: ReservationFo
         <p className="text-3xl font-bold text-blue-600">${totalPrice.toFixed(2)}</p>
       </div>
 
-      {error && <p className="text-red-500 text-sm font-medium">{error}</p>}
-      
-      {/* Nuevo mensaje de éxito */}
-      {success && (
+      {successMessage && (
         <p className="text-emerald-500 text-sm font-medium text-center p-3 bg-emerald-50 rounded-xl border border-emerald-200">
           ¡Reserva exitosa! Redirigiendo a tu dashboard...
         </p>
