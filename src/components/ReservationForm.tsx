@@ -14,6 +14,7 @@ export default function ReservationForm({ spaceId, pricePerHour }: ReservationFo
   const [totalPrice, setTotalPrice] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const router = useRouter();
 
   const calculatePrice = (start: string, end: string) => {
@@ -39,8 +40,10 @@ export default function ReservationForm({ spaceId, pricePerHour }: ReservationFo
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Something went wrong");
 
-      alert("¡Reserva exitosa!");
-      router.push("/dashboard");
+      setSuccessMessage("¡Reserva exitosa!");
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 2000);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -50,6 +53,11 @@ export default function ReservationForm({ spaceId, pricePerHour }: ReservationFo
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {successMessage && (
+        <div className="bg-emerald-50 text-emerald-700 p-4 rounded-xl text-center font-medium">
+          {successMessage}
+        </div>
+      )}
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Inicio</label>
@@ -85,6 +93,13 @@ export default function ReservationForm({ spaceId, pricePerHour }: ReservationFo
       </div>
 
       {error && <p className="text-red-500 text-sm font-medium">{error}</p>}
+      
+      {/* Nuevo mensaje de éxito */}
+      {success && (
+        <p className="text-emerald-500 text-sm font-medium text-center p-3 bg-emerald-50 rounded-xl border border-emerald-200">
+          ¡Reserva exitosa! Redirigiendo a tu dashboard...
+        </p>
+      )}
 
       <button 
         type="submit" 
