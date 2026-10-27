@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  name         String
+  password     String
+  role         Role          @default(USER)
+  refreshToken String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  reservations Reservation[]
+}
+
+model Space {
+  id           String        @id @default(uuid())
+  name         String
+  description  String
+  pricePerHour Decimal       @db.Decimal(10, 2)
+  isActive     Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  reservations Reservation[]
+}
+
+model Reservation {
+  id         String            @id @default(uuid())
+  userId     String
+  spaceId    String
+  startTime  DateTime
+  endTime    DateTime
+  totalPrice Decimal           @db.Decimal(10, 2)
+  status     ReservationStatus @default(CONFIRMED)
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+  space      Space             @relation(fields: [spaceId], references: [id])
+  user       User              @relation(fields: [userId], references: [id])
+}
+
+model Reservsa {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum ReservationStatus {
+  CONFIRMED
+  CANCELLED
+}
