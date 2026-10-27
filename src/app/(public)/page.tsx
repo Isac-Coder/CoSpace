@@ -1,12 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-const money=(v:number)=>new Intl.NumberFormat("es-CO",{style:"currency",currency:"COP",maximumFractionDigits:0}).format(v);
-export default async function HomePage(){
-// Importa el tipo Space desde el cliente generado
 import { Prisma } from "@/generated";
 
-// ... (dentro de HomePage)
+const money=(v:number)=>new Intl.NumberFormat("es-CO",{style:"currency",currency:"COP",maximumFractionDigits:0}).format(v);
+
+export default async function HomePage(){
   let spaces: Prisma.SpaceGetPayload<{}>[] = [];
   try {
     spaces = await prisma.space.findMany({
