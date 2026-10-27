@@ -1,0 +1,7 @@
+@import "tailwindcss";
+:root { color-scheme: dark; }
+html { scroll-behavior: smooth; }
+body { background: #080d18; color: #f8fafc; font-family: Arial, Helvetica, sans-serif; }
+::selection { background: rgba(59,130,246,.35); color: #fff; }
+button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; }
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px solid #60a5fa; outline-offset: 3px; }

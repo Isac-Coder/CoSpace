@@ -6,26 +6,16 @@ datasource db {
   provider = "postgresql"
 }
 
-enum Role {
-  USER
-  ADMIN
-}
-
 model User {
-  id            String        @id @default(uuid())
-  email         String        @unique
-  name          String
-  password      String
-  role          Role          @default(USER)
-  refreshToken  String?
-  reservations  Reservation[]
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-}
-
-enum ReservationStatus {
-  CONFIRMED
-  CANCELLED
+  id           String        @id @default(uuid())
+  email        String        @unique
+  name         String
+  password     String
+  role         Role          @default(USER)
+  refreshToken String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  reservations Reservation[]
 }
 
 model Space {
@@ -34,29 +24,38 @@ model Space {
   description  String
   pricePerHour Decimal       @db.Decimal(10, 2)
   isActive     Boolean       @default(true)
-  reservations Reservation[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+  reservations Reservation[]
 }
 
 model Reservation {
-  id          String            @id @default(uuid())
-  userId      String
-  spaceId     String
-  startTime   DateTime
-  endTime     DateTime
-  totalPrice  Decimal           @db.Decimal(10, 2)
-  status      ReservationStatus @default(CONFIRMED)
-  user        User              @relation(fields: [userId], references: [id])
-  space       Space             @relation(fields: [spaceId], references: [id])
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
+  id         String            @id @default(uuid())
+  userId     String
+  spaceId    String
+  startTime  DateTime
+  endTime    DateTime
+  totalPrice Decimal           @db.Decimal(10, 2)
+  status     ReservationStatus @default(CONFIRMED)
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+  space      Space             @relation(fields: [spaceId], references: [id])
+  user       User              @relation(fields: [userId], references: [id])
 }
 
-
 model Reservsa {
-  id        String    @id @default(uuid())
-  name      String        
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum ReservationStatus {
+  CONFIRMED
+  CANCELLED
 }

@@ -1,36 +1,28 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CoSpace
 
-## Getting Started
+Plataforma de coworking construida con Next.js 16, TypeScript, Prisma y PostgreSQL.
 
-First, run the development server:
+## Páginas incluidas
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- `/` — landing page y espacios destacados.
+- `/spaces` — catálogo de espacios disponibles.
+- `/spaces/[id]` — detalle del espacio y formulario de reserva.
+- `/login` y `/register` — autenticación y registro conectados a los endpoints existentes.
+- `/dashboard` — panel del usuario con sus reservas, próxima reserva, historial y cancelación.
+- `/admin` — dashboard administrativo con métricas y actividad.
+- `/admin/spaces` — gestión de espacios: creación, edición, filtros, búsqueda y activación/desactivación.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Puesta en marcha
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Copia `.env.example` a `.env` y configura `DATABASE_URL`, `DIRECT_URL` y las claves JWT requeridas por `src/lib/auth/jwt.ts`.
+2. Instala dependencias: `npm install`.
+3. Genera el cliente Prisma: `npm run prisma:generate`.
+4. Aplica las migraciones: `npm run prisma:migrate` (o el comando apropiado para tu entorno).
+5. Inicia el servidor: `npm run dev`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Notas
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Las páginas y métricas dependen de una base de datos PostgreSQL correctamente configurada y con migraciones aplicadas.
+- El catálogo usa imágenes de muestra de `picsum.photos` y la portada una imagen de Unsplash. Sustituye estas imágenes por recursos propios antes de producción.
+- La interfaz administrativa usa las rutas `/api/admin/spaces` existentes. Verifica la protección de todas las rutas en el servidor antes de desplegar.
+- No se ha podido ejecutar un build de validación en este entorno porque el proyecto no tenía `node_modules` instalado. Ejecuta `npm install && npm run build` localmente y corrige cualquier error de entorno o Prisma que aparezca.
