@@ -37,10 +37,10 @@ export default function LoginPage() {
           data.error || "No pudimos iniciar sesión."
         );
       }
+      
+      console.log("Login data:", data);
 
-      router.push(
-        data.role === "ADMIN" ? "/admin" : "/dashboard"
-      );
+      window.location.href = data.role === "ADMIN" ? "/admin" : "/dashboard";
 
       router.refresh();
     } catch (err) {

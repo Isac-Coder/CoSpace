@@ -5,41 +5,39 @@ import { verifyAccessToken } from "@/lib/auth/jwt";
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const accessToken = request.cookies.get("access_token")?.value;
+  const decoded = accessToken ? (verifyAccessToken(accessToken) as any) : null;
 
-  // 1. Define public paths that don't require authentication
-  const isPublicPath = 
-    pathname === "/" || 
-    pathname === "/login" ||
-    pathname === "/register" ||
-    pathname.startsWith("/auth") || 
-    pathname.startsWith("/spaces") || 
+  // 1. Define path groups
+  const isAuthPath = pathname === "/login" || pathname === "/register";
+  const isAdminPath = pathname.startsWith("/admin");
+  const isPublicPath =
+    pathname === "/" ||
+    pathname.startsWith("/auth") ||
+    pathname.startsWith("/spaces") ||
     pathname.startsWith("/api/auth");
 
-  // 2. Define admin paths
-  const isAdminPath = pathname.startsWith("/admin");
-
-  // If it's a public path, let it pass
-  if (isPublicPath) {
+  // 2. Logic if user IS logged in
+  if (decoded) {
+    // Redirect logged in user away from auth pages
+    if (isAuthPath) {
+      return NextResponse.redirect(
+        new URL(decoded.role === "ADMIN" ? "/admin" : "/dashboard", request.url)
+      );
+    }
+    // Protect admin paths
+    if (isAdminPath && decoded.role !== "ADMIN") {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
     return NextResponse.next();
   }
 
-  // For private and admin paths, we need a valid token
-  if (!accessToken) {
-    return NextResponse.redirect(new URL("/login", request.url));
+  // 3. Logic if user is NOT logged in
+  if (isPublicPath || isAuthPath) {
+    return NextResponse.next();
   }
 
-  const decoded = verifyAccessToken(accessToken) as any;
-
-  if (!decoded) {
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
-
-  // Admin protection: if it's an admin path but user is not ADMIN
-  if (isAdminPath && decoded.role !== "ADMIN") {
-    return NextResponse.redirect(new URL("/", request.url));
-  }
-
-  return NextResponse.next();
+  // 4. Redirect not logged in user to login
+  return NextResponse.redirect(new URL("/login", request.url));
 }
 
 export const config = {
